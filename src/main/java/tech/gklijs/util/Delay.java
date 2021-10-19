@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 public final class Delay {
@@ -13,15 +14,19 @@ public final class Delay {
         //prevent instantiation
     }
 
-    public static void stop(){
+    public static void stop() {
         timer.cancel();
     }
 
-    public static <T> T getDelayed(int seconds, Supplier<T> supplier){
+    public static <T> Future<T> getDelayedFuture(int seconds, Supplier<T> supplier) {
         CompletableFuture<T> future = new CompletableFuture<>();
         timer.schedule(new DelayedTask<>(future, supplier), seconds * 1_000L);
+        return future;
+    }
+
+    public static <T> T getDelayed(int seconds, Supplier<T> supplier) {
         try {
-            return future.get();
+            return getDelayedFuture(seconds, supplier).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

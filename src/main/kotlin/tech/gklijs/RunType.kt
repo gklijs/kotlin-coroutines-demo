@@ -2,37 +2,42 @@ package tech.gklijs
 
 import kotlinx.coroutines.launch
 
-enum class RunType(val run: (Int, ActionType) -> Unit) {
+enum class RunType(val run: RunFunction) {
     //Serial Main
-    SM({ t, a ->
+    SM({ d, t, a ->
         repeat(t) {
-            a.action.invoke()
+            a.action.run(d)
         }
     }),
+
     //Coroutine Unconfined
-    CU({ t, a ->
-        kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Unconfined){
+    CU({ d, t, a ->
+        kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Unconfined) {
             repeat(t) {
-                launch { a.action.invoke() }
+                launch { a.action.suspend(d) }
             }
         }
     }),
+
     //Coroutine Default
-    CD({ t, a ->
-        kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default){
+    CD({ d, t, a ->
+        kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default) {
             repeat(t) {
-                launch { a.action.invoke() }
+                launch { a.action.suspend(d) }
             }
         }
     }),
+
     //Fixed Thread pool
-    FT({ t, a ->
+    FT({ d, t, a ->
         val pool = java.util.concurrent.Executors.newFixedThreadPool(t)
         val futures = mutableListOf<java.util.concurrent.Future<*>>()
         repeat(t) {
-            futures.add(pool.submit(a.action))
+            futures.add(pool.submit { a.action.run(d) })
         }
-        futures.forEach{x -> x.get()}
+        futures.forEach { x -> x.get() }
         pool.shutdown()
     })
 }
+
+typealias RunFunction = (delay: Int, times: Int, action: ActionType) -> Unit
