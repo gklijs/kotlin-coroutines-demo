@@ -9,19 +9,29 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class Delay {
-    static Timer timer = new Timer();
-
     private Delay() {
         //prevent instantiation
     }
 
-    public static void stop() {
-        timer.cancel();
+    private static Timer timer = null;
+
+    private static synchronized Timer getTimer() {
+        if (timer == null) {
+            timer = new Timer();
+        }
+        return timer;
+    }
+
+    public static synchronized void stop() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 
     public static <T> Future<T> getDelayedFuture(int seconds, Supplier<T> supplier, Consumer<T> callback) {
         CompletableFuture<T> future = new CompletableFuture<>();
-        timer.schedule(new DelayedTask<T>(future, supplier, callback), seconds * 1_000L);
+        getTimer().schedule(new DelayedTask<>(future, supplier, callback), seconds * 1_000L);
         return future;
     }
 

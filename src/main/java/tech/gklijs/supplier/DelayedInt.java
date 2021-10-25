@@ -13,6 +13,10 @@ public final class DelayedInt {
 
     private static final AtomicInteger atom = new AtomicInteger(0);
 
+    public static Integer get() {
+        return atom.getAndIncrement();
+    }
+
     public static Integer get(Integer delay) {
         return Delay.getDelayed(delay, atom::getAndIncrement);
     }

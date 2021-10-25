@@ -1,7 +1,10 @@
 package tech.gklijs
 
 enum class ActionType(val action: IntAction) {
-    DELAYED(Sup { d -> tech.gklijs.supplier.DelayedInt.get(d) }),
-    FUTURE(Fut { d -> tech.gklijs.supplier.DelayedInt.getFuture(d) }),
-    CALLABLE(Cal { d, c -> tech.gklijs.supplier.DelayedInt.getFuture(d, c) })
+    DELAYED(GetSupplier { d -> tech.gklijs.supplier.DelayedInt.get(d) }),
+    FUTURE(GetFuture { d -> tech.gklijs.supplier.DelayedInt.getFuture(d) }),
+    CALLABLE(GetFutureWithCallBack { d, c -> tech.gklijs.supplier.DelayedInt.getFuture(d, c) }),
+    UNSAFE_CONSUMER(GetSingleThreadConsumer { d ->
+        tech.gklijs.consumer.SingleThreadConsumer(d) { tech.gklijs.supplier.DelayedInt.get() }
+    })
 }

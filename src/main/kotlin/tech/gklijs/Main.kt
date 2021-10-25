@@ -3,6 +3,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import tech.gklijs.ActionType
 import tech.gklijs.RunType
+import tech.gklijs.consumer.ConcurrentProducer
 import tech.gklijs.util.Delay
 import java.time.Duration
 import java.time.Instant
@@ -19,12 +20,15 @@ fun main(args: Array<String>) {
 
     try {
         parser.parse(args)
+        println("Will start running action $actionType with a delay of $delay seconds for a total of $times times, run as $runType")
 
         val startTime = Instant.now()
         runType.run.invoke(delay, times, actionType)
         val endTime = Instant.now()
+
         println("Running the actions took approximately: ${Duration.between(startTime, endTime)}")
     } finally {
         Delay.stop()
+        ConcurrentProducer.stop()
     }
 }
