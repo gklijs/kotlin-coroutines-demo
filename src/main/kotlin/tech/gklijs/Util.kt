@@ -2,13 +2,16 @@ package tech.gklijs
 
 import kotlinx.coroutines.delay
 import tech.gklijs.consumer.PollingConsumer
+import java.time.Instant
 import java.util.concurrent.Future
 import java.util.function.Consumer
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 fun Int.log() {
-    println("received number: ${this.toString().padStart(5, '0')} - logged from ${Thread.currentThread().name}")
+    println("${Instant.now()} - received number: ${
+        this.toString().padStart(5, '0')
+    } - logged from ${Thread.currentThread().name}")
 }
 
 fun IntAction.run(delay: Int) {
@@ -16,7 +19,7 @@ fun IntAction.run(delay: Int) {
         is GetSupplier -> this.value.invoke(delay).log()
         is GetFuture -> this.value.invoke(delay).get().log()
         is GetFutureWithCallBack -> this.value.invoke(delay) { x -> x.log() }.get()
-        is GetSingleThreadConsumer -> this.value.invoke(delay).runTill(10)
+        is GetConsumer -> this.value.invoke(delay).runTill(10)
     }
 }
 
@@ -36,7 +39,7 @@ suspend fun IntAction.suspend(delay: Int) {
         is GetSupplier -> this.value.invoke(delay).log()
         is GetFuture -> this.value.invoke(delay).eventuallyLog()
         is GetFutureWithCallBack -> this.value.dispatch(delay).log()
-        is GetSingleThreadConsumer -> this.value.invoke(delay).suspendTill(10)
+        is GetConsumer -> this.value.invoke(delay).suspendTill(10)
     }
 }
 

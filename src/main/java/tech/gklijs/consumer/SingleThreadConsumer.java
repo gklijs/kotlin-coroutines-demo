@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
+import static tech.gklijs.consumer.Util.delay;
+
 public class SingleThreadConsumer<T> implements PollingConsumer<T> {
 
     private final Instant startedAt;
@@ -74,13 +76,5 @@ public class SingleThreadConsumer<T> implements PollingConsumer<T> {
     private long millisTillNext() {
         long secondsToNext = (itemsRetrieved + 1) * secondsPerItem;
         return Duration.between(Instant.now(), startedAt.plus(secondsToNext, ChronoUnit.SECONDS)).toMillis();
-    }
-
-    private void delay(Long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new PollInterruptedException(e);
-        }
     }
 }

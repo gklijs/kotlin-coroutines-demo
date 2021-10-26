@@ -1,9 +1,12 @@
 package tech.gklijs.consumer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.function.Supplier;
+
+import static tech.gklijs.consumer.Util.delay;
 
 public class ConcurrentConsumer<T> implements PollingConsumer<T> {
     private final ScheduledFuture<?> future;
@@ -19,8 +22,20 @@ public class ConcurrentConsumer<T> implements PollingConsumer<T> {
         if (future.isCancelled() || future.isDone()) {
             throw new AlreadyClosedException();
         }
-        //TODO
-        return null;
+        if (queue.isEmpty()) {
+            delay(millis.longValue());
+        }
+        return getFromQueue();
+    }
+
+    private List<T> getFromQueue() {
+        List<T> list = new ArrayList<>();
+        T head = queue.poll();
+        while (head != null) {
+            list.add(head);
+            head = queue.poll();
+        }
+        return list;
     }
 
     @Override
