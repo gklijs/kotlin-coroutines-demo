@@ -12,9 +12,9 @@ public class ConcurrentConsumer<T> implements PollingConsumer<T> {
     private final ScheduledFuture<?> future;
     private ConcurrentLinkedQueue<T> queue;
 
-    public ConcurrentConsumer(int secondsPerItem, Supplier<T> supplier) {
+    public ConcurrentConsumer(int millisPerItem, Supplier<T> supplier) {
         queue = new ConcurrentLinkedQueue<>();
-        future = ConcurrentProducer.start(secondsPerItem, supplier, queue);
+        future = ConcurrentProducer.start(millisPerItem, supplier, queue);
     }
 
     @Override

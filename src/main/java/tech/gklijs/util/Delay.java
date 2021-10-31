@@ -29,19 +29,19 @@ public final class Delay {
         }
     }
 
-    public static <T> Future<T> getDelayedFuture(int seconds, Supplier<T> supplier, Consumer<T> callback) {
+    public static <T> Future<T> getDelayedFuture(int delay, Supplier<T> supplier, Consumer<T> callback) {
         CompletableFuture<T> future = new CompletableFuture<>();
-        getTimer().schedule(new DelayedTask<>(future, supplier, callback), seconds * 1_000L);
+        getTimer().schedule(new DelayedTask<>(future, supplier, callback), delay);
         return future;
     }
 
-    public static <T> Future<T> getDelayedFuture(int seconds, Supplier<T> supplier) {
-        return getDelayedFuture(seconds, supplier, null);
+    public static <T> Future<T> getDelayedFuture(int delay, Supplier<T> supplier) {
+        return getDelayedFuture(delay, supplier, null);
     }
 
-    public static <T> T getDelayed(int seconds, Supplier<T> supplier) {
+    public static <T> T getDelayed(int delay, Supplier<T> supplier) {
         try {
-            return getDelayedFuture(seconds, supplier).get();
+            return getDelayedFuture(delay, supplier).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

@@ -28,7 +28,7 @@ public final class ConcurrentProducer {
         }
     }
 
-    static <T> ScheduledFuture<?> start(int secondsPerItem, Supplier<T> supplier, Queue<T> queue) {
-        return getExecutor().scheduleAtFixedRate(() -> queue.add(supplier.get()), secondsPerItem, secondsPerItem, TimeUnit.SECONDS);
+    static <T> ScheduledFuture<?> start(int millisPerItem, Supplier<T> supplier, Queue<T> queue) {
+        return getExecutor().scheduleAtFixedRate(() -> queue.add(supplier.get()), millisPerItem, millisPerItem, TimeUnit.MILLISECONDS);
     }
 }

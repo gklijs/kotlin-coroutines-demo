@@ -14,14 +14,14 @@ import static tech.gklijs.consumer.Util.delay;
 public class SingleThreadConsumer<T> implements PollingConsumer<T> {
 
     private final Instant startedAt;
-    private final int secondsPerItem;
+    private final int millisPerItem;
     private final Supplier<T> supplier;
     private String threadName;
     private long itemsRetrieved;
     private boolean closed = false;
 
-    public SingleThreadConsumer(int secondsPerItem, Supplier<T> supplier) {
-        this.secondsPerItem = secondsPerItem;
+    public SingleThreadConsumer(int millisPerItem, Supplier<T> supplier) {
+        this.millisPerItem = millisPerItem;
         this.supplier = supplier;
         startedAt = Instant.now();
     }
@@ -66,7 +66,7 @@ public class SingleThreadConsumer<T> implements PollingConsumer<T> {
     }
 
     private long itemsAvailable() {
-        long totalItems = Duration.between(startedAt, Instant.now()).getSeconds() / secondsPerItem;
+        long totalItems = Duration.between(startedAt, Instant.now()).toMillis() / millisPerItem;
         if (totalItems <= itemsRetrieved) {
             return 0;
         }
@@ -74,7 +74,7 @@ public class SingleThreadConsumer<T> implements PollingConsumer<T> {
     }
 
     private long millisTillNext() {
-        long secondsToNext = (itemsRetrieved + 1) * secondsPerItem;
-        return Duration.between(Instant.now(), startedAt.plus(secondsToNext, ChronoUnit.SECONDS)).toMillis();
+        long millisToNext = (itemsRetrieved + 1) * millisPerItem;
+        return Duration.between(Instant.now(), startedAt.plus(millisToNext, ChronoUnit.MILLIS)).toMillis();
     }
 }

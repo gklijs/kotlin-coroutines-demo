@@ -19,14 +19,14 @@ fun IntAction.run(delay: Int) {
         is GetSupplier -> this.value.invoke(delay).log()
         is GetFuture -> this.value.invoke(delay).get().log()
         is GetFutureWithCallBack -> this.value.invoke(delay) { x -> x.log() }.get()
-        is GetConsumer -> this.value.invoke(delay).runTill(10)
+        is GetConsumer -> this.value.invoke(delay).runTill(Constants.consumeAmount)
     }
 }
 
 fun PollingConsumer<Int>.runTill(items: Int) {
     var consumed = 0
     while (consumed < items) {
-        this.poll(100).forEach {
+        this.poll(Constants.consumeDelay).forEach {
             consumed++
             it.log()
         }
@@ -39,13 +39,13 @@ suspend fun IntAction.suspend(delay: Int) {
         is GetSupplier -> this.value.invoke(delay).log()
         is GetFuture -> this.value.invoke(delay).eventuallyLog()
         is GetFutureWithCallBack -> this.value.dispatch(delay).log()
-        is GetConsumer -> this.value.invoke(delay).suspendTill(10)
+        is GetConsumer -> this.value.invoke(delay).suspendTill(Constants.consumeAmount)
     }
 }
 
 suspend fun Future<Int>.eventuallyLog() {
     while (!this.isDone && !this.isCancelled) {
-        delay(10)
+        delay(Constants.futureDelay.toLong())
     }
     this.runCatching { this.get().log() }
 }
@@ -59,7 +59,7 @@ suspend inline fun ((Int, Consumer<Int>) -> Future<Int>).dispatch(delay: Int) =
 suspend fun PollingConsumer<Int>.suspendTill(items: Int) {
     var consumed = 0
     while (consumed < items) {
-        delay(100)
+        delay(Constants.consumeDelay.toLong())
         this.poll(0).forEach {
             consumed++
             it.log()
