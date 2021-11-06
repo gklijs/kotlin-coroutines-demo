@@ -29,7 +29,6 @@ enum class RunType(val description: String, val run: RunFunction) {
         }
     }),
 
-    //Coroutine Default
     COROUTINE_DEFAULT("run suspended in default dispatch context", { d, t, a ->
         kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default) {
             repeat(t) {

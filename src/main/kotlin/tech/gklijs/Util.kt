@@ -1,10 +1,15 @@
 package tech.gklijs
 
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import tech.gklijs.SupplierHelper.supplierContext
 import tech.gklijs.consumer.PollingConsumer
 import java.time.Instant
+import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.function.Consumer
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -36,11 +41,23 @@ fun PollingConsumer<Int>.runTill(items: Int) {
 
 suspend fun IntAction.suspend(delay: Int) {
     when (this) {
-        is GetSupplier -> this.value.invoke(delay).log()
+        is GetSupplier -> this.value.viaHelper(delay)
         is GetFuture -> this.value.invoke(delay).eventuallyLog()
         is GetFutureWithCallBack -> this.value.dispatch(delay).log()
         is GetConsumer -> this.value.invoke(delay).suspendTill(Constants.consumeAmount)
     }
+}
+
+object SupplierHelper {
+    val supplierContext: CoroutineContext by lazy {
+        Executors.newFixedThreadPool(Constants.helperThreads).asCoroutineDispatcher()
+    }
+}
+
+suspend fun ((Int) -> Int).viaHelper(delay: Int) {
+    val f = this
+    val i = withContext(supplierContext) { f.invoke(delay) }
+    i.log()
 }
 
 suspend fun Future<Int>.eventuallyLog() {

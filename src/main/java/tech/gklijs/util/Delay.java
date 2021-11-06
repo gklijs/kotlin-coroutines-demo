@@ -22,13 +22,6 @@ public final class Delay {
         return timer;
     }
 
-    public static synchronized void stop() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
     public static <T> Future<T> getDelayedFuture(int delay, Supplier<T> supplier, Consumer<T> callback) {
         CompletableFuture<T> future = new CompletableFuture<>();
         getTimer().schedule(new DelayedTask<>(future, supplier, callback), delay);

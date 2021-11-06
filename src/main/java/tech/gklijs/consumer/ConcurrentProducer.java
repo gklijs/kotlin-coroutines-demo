@@ -21,13 +21,6 @@ public final class ConcurrentProducer {
         return executor;
     }
 
-    public static synchronized void stop() {
-        if (executor != null) {
-            executor.shutdown();
-            executor = null;
-        }
-    }
-
     static <T> ScheduledFuture<?> start(int millisPerItem, Supplier<T> supplier, Queue<T> queue) {
         return getExecutor().scheduleAtFixedRate(() -> queue.add(supplier.get()), millisPerItem, millisPerItem, TimeUnit.MILLISECONDS);
     }

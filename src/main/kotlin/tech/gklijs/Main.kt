@@ -4,10 +4,9 @@ import kotlinx.cli.default
 import tech.gklijs.ActionType
 import tech.gklijs.Constants
 import tech.gklijs.RunType
-import tech.gklijs.consumer.ConcurrentProducer
-import tech.gklijs.util.Delay
 import java.time.Duration
 import java.time.Instant
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val parser = ArgParser("kotlin coroutines demo")
@@ -20,19 +19,24 @@ fun main(args: Array<String>) {
         .default(RunType.SAME_THREAD)
     val consumeDelay by parser.option(ArgType.Int,
         shortName = "cd",
-        description = "max delay between poll calls in milliseconds").default(100)
+        description = "max delay between poll calls in milliseconds").default(Constants.consumeDelay)
     val consumeAmount by parser.option(ArgType.Int,
         shortName = "ca",
-        description = "amount of items to consume before closing the consumer").default(10)
+        description = "amount of items to consume before closing the consumer").default(Constants.consumeAmount)
     val futureDelay by parser.option(ArgType.Int,
         shortName = "fd",
-        description = "amount of time between checking if the future has resolved").default(10)
+        description = "amount of time between checking if the future has resolved").default(Constants.futureDelay)
+    val helperThreads by parser.option(ArgType.Int,
+        shortName = "ht",
+        description = "amount of threads the helper has, this will be used to suspend the delayed function in another context")
+        .default(Constants.helperThreads)
 
     try {
         parser.parse(args)
         Constants.setAndPrintConsumeDelay(consumeDelay)
         Constants.setAndPrintConsumeAmount(consumeAmount)
         Constants.setAndPrintFutureDelay(futureDelay)
+        Constants.setAndPrintHelperThreads(helperThreads)
         println("Will start ${actionType.description} with a delay of $delay milliseconds for a total of $times times, ${runType.description}.")
 
         val startTime = Instant.now()
@@ -40,8 +44,9 @@ fun main(args: Array<String>) {
         val endTime = Instant.now()
 
         println("Running the actions took approximately: ${Duration.between(startTime, endTime)}")
-    } finally {
-        Delay.stop()
-        ConcurrentProducer.stop()
+    } catch (e: Exception) {
+        println("Encountered exception trying to run the tasks: $e")
+        exitProcess(1)
     }
+    exitProcess(0)
 }
