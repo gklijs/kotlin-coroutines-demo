@@ -7,7 +7,8 @@
 * [Using this project](#utp)
 * [Diagrams](#diagrams)
   * [Using a thread pool](#tp)
-  * [Future from coroutine on the main (current) thread](#future-coroutine)
+  * [Use a separate context for delayed](#delayed-coroutine)
+  * [Future from coroutine on the main thread](#future-coroutine)
   * [Using the consumer in parallel](#consumer-parallel)
 
 ## <a id="intro">Introduction</a>
@@ -53,17 +54,25 @@ Here are some diagrams for some actions to make clear what happens.
 
 ### <a id="tp">Using a thread pool</a>
 
-This is one of the ways to run multiple things in parallel. A poll with multiple threads is created and runnables can be
+This is one of the ways to run multiple things in parallel. A poll with multiple threads is created and functions can be
 executed on of the backing threads. The picture below is an approximation of
-running `gradle run --args='-a delayed -t 2 -r thread_pool`.
-![main thread using two childs threads to each do a delayed call](img/delayed.png "Delayed on thread pool")
+running `gradle run --args='-a delayed -t 2 -r thread_pool'`.
+![main thread using two child threads to each do a delayed call](img/delayed.png "Delayed on thread pool")
 
-### <a id="future-coroutine">Future from coroutine on the main (current) thread</a>
+### <a id="delayed-coroutine">Use a separate context for delayed</a>
+
+With coroutines, it's possible to switch the coroutine context, thus preventing saturating or blocking one. When the
+action `delayed` is run in a coroutine a separate context, `supplierContext` is used of which the backing threads can be
+configured with the `-ht` option, by default it's two. The picture below is an approximation of
+running `gradle run --args='-a delayed -t 2 -r suspended -ht 2'`
+![suspend using the newly created context, with the underlying threads](img/delayed_suspended.png "Delayed with separate coroutine context")
+
+### <a id="future-coroutine">Future from coroutine on the main thread</a>
 
 Using the extension function `eventuallyLog()`
 in [Util.kt](https://github.com/gklijs/kotlin-coroutines-demo/blob/main/src/main/kotlin/tech/gklijs/Util.kt) the main
 thread just needs to check occasionally if the future is completed already, so isn't blocked like it would with
-calling `get()`. The picture below is an approximation of running `gradle run --args='-a future -t 2 -r suspended`.
+calling `get()`. The picture below is an approximation of running `gradle run --args='-a future -t 2 -r suspended'`.
 ![main thread created futures from coroutine and keeps checking if they are completed](img/future_suspended.png "Running futures suspended")
 
 ### <a id="consumer-parallel">Using the consumer in parallel</a>

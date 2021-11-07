@@ -26,8 +26,10 @@
     mt -> c2 : initiate delay call
     activate c2 #blue
 
-    c1 -> so : print msg
+    c1 -> mt : return value 1
     deactivate c1
-    c2 -> so : print msg
+    mt -> so : print msg 1
+    c2 -> mt : return value 2
     deactivate c2
+    mt -> so : print msg 2
 @enduml
