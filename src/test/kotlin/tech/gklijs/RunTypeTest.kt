@@ -34,12 +34,12 @@ class RunTypeTest {
 
     @Test
     fun coroutineDefaultTest() {
-        genericTest(RunType.COROUTINE_DEFAULT)
+        genericTest(RunType.SUSPENDED_DEFAULT)
     }
 
     @Test
     fun coroutineUnconfinedTest() {
-        genericTest(RunType.COROUTINE_UNCONFINED)
+        genericTest(RunType.SUSPENDED_UNCONFINED)
     }
 
     @Test
@@ -49,7 +49,7 @@ class RunTypeTest {
 
     @Test
     fun coroutineDefaultBlockingTest() {
-        genericTest(RunType.COROUTINE_DEFAULT_BLOCKING)
+        genericTest(RunType.SUSPENDED_DEFAULT_BLOCKING)
     }
 
     @Test

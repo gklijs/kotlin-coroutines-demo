@@ -2,18 +2,37 @@ package tech.gklijs
 
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
+import java.util.concurrent.Future
 
 enum class RunType(val description: String, val run: RunFunction) {
     SAME_THREAD("serially running all actions in same thread",
         { d, t, a ->
-            repeat(t) {
-                a.action.run(d)
+            when (val action = a.action) {
+                is GetFuture -> {
+                    val futures = buildList(t) {
+                        repeat(t) {
+                            add(action.value.invoke(d))
+                        }
+                    }
+                    futures.forEach { x -> x.get().log() }
+                }
+                is GetFutureWithCallBack -> {
+                    val futures = buildList(t) {
+                        repeat(t) {
+                            add(action.value.invoke(d) { y -> y.log() })
+                        }
+                    }
+                    futures.forEach { x -> x.get() }
+                }
+                else -> repeat(t) {
+                    action.run(d)
+                }
             }
         }),
 
     THREAD_POOL("running in parallel, each action in it's own thread", { d, t, a ->
         val pool = java.util.concurrent.Executors.newFixedThreadPool(t)
-        val futures = mutableListOf<java.util.concurrent.Future<*>>()
+        val futures = mutableListOf<Future<*>>()
         repeat(t) {
             futures.add(pool.submit { a.action.run(d) })
         }
@@ -29,7 +48,7 @@ enum class RunType(val description: String, val run: RunFunction) {
         }
     }),
 
-    COROUTINE_DEFAULT("run suspended in default dispatch context", { d, t, a ->
+    SUSPENDED_DEFAULT("run suspended in default dispatch context", { d, t, a ->
         kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default) {
             repeat(t) {
                 launch { a.action.suspend(d) }
@@ -37,7 +56,7 @@ enum class RunType(val description: String, val run: RunFunction) {
         }
     }),
 
-    COROUTINE_UNCONFINED("run suspended in unconfined dispatch context", { d, t, a ->
+    SUSPENDED_UNCONFINED("run suspended in unconfined dispatch context", { d, t, a ->
         kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Unconfined) {
             repeat(t) {
                 launch { a.action.suspend(d) }
@@ -53,7 +72,7 @@ enum class RunType(val description: String, val run: RunFunction) {
         }
     }),
 
-    COROUTINE_DEFAULT_BLOCKING("run suspended in default context, but using blocking function calls", { d, t, a ->
+    SUSPENDED_DEFAULT_BLOCKING("run suspended in default context, but using blocking function calls", { d, t, a ->
         kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default) {
             repeat(t) {
                 launch { a.action.run(d) }
