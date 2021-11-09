@@ -65,7 +65,7 @@ Options:
     --delay, -d [1000] -> delay for each action in milliseconds { Int }
     --times, -t [10] -> times to run an action { Int }
     --actionType, -a [DELAYED] -> action to execute { Value should be one of [delayed, future, callable, unsafe_consumer, safe_consumer] }
-    --runType, -r [SAME_THREAD] -> how to run the actions { Value should be one of [same_thread, thread_pool, suspended, suspended_default, suspended_unconfined, suspended_blocking, suspended_default_blocking, suspended_new] }
+    --runType, -r [SAME_THREAD] -> how to run the actions { Value should be one of [same_thread, same_thread_complicated, thread_pool, suspended, suspended_default, suspended_unconfined, suspended_blocking, suspended_default_blocking, suspended_new] }
     --consumeDelay, -cd [100] -> max delay between poll calls in milliseconds { Int }
     --consumeAmount, -ca [10] -> amount of items to consume before closing the consumer { Int }
     --futureDelay, -fd [10] -> amount of time between checking if the future has resolved { Int }
@@ -102,14 +102,15 @@ context in the same way as `suspended`.
 ### <a id="future">Future</a>
 
 This will return a future, which we can store and call the `get()` on later. This is tricky to get right, and is done
-only when running as `same_thread`. Doing this we can
-complete `gradle run --args='-a future -t 20 -r same_thread -d 500'` in a little over half a seconds. When run in a
-blocking way with other runtimes we just directly call the `get()` effectively making it the same as `delayed`.
+only when running as `same_thread_complicated`. Doing this we can
+complete `gradle run --args='-a future -t 20 -r same_thread_complicated -d 500'` in a little over half a seconds. When
+run in a blocking way with other runtimes we just directly call the `get()` effectively making it the same as `delayed`.
+So `gradle run --args='-a future -t 20 -r same_thread -d 500'` will still take little over 10 seconds.
 
 Luckily with coroutines we can check if the future is either canceled or completed, and otherwise delay for some amount
-of time. While delay might look a lot like `Thread.sleep()` but the big advantage is that delay won't block the thread.
-Using the trick it's possible for `gradle run --args='-a future -t 20 -r suspended -d 500'` to finish in about half a
-second. Optionally with -fd the time for the delay can be set, for
+of time. Delay might look a lot like `Thread.sleep()`, but the big advantage is that delay won't block the thread. Using
+this trick it's possible for `gradle run --args='-a future -t 20 -r suspended -d 500'` to finish in about half a second.
+Optionally with -fd the time for the delay can be set, for
 example `gradle run --args='-a future -t 20 -r suspended_unconfined -d 500 -fd 1000'`
 will complete a little over a second, because it will delay a full second, before checking the future again.
 
@@ -117,19 +118,22 @@ will complete a little over a second, because it will delay a full second, befor
 
 This provides an api, where we can pass a function which will be called once the future is completed. This won't help
 much when run in the usual way, since we still need to `get()` the resulting future, otherwise the program will end
-before the Integers are logged. When run with `same_thread` we apply a similar trick as with the futures, first creating
-the futures and then calling `get()` on them. `gradle run --args='-a callable -t 20 -r same_thread -d 500'` this also
-completes in half a second, this time it's logged from the Timer thread used in the Java part however, as can be seen
-from logs like: `2021-11-08T20:34:08.647508Z - received number: 00019 - logged from Timer-0`.
+before the Integers are logged. When run with `same_thread_complicated` we apply a similar trick as with the futures,
+first creating the futures and then calling `get()` on
+them. `gradle run --args='-a callable -t 20 -r same_thread_complicated -d 500'` thus also completes in half a second,
+this time it's logged from the Timer thread used in the Java part however, as can be seen from logs
+like: `2021-11-08T20:34:08.647508Z - received number: 00019 - logged from Timer-0`.
 
-With coroutines we can use the callback to create a `suspendCoroutine` that resumes when the callback is called. So we
-no longer need to check each time and delay, but we just 'wait' for the result till we can continue.
+With coroutines, we can use the callback to create a `suspendCoroutine` that resumes when the callback is called. So we
+no longer need to check each time and delay, but we just 'wait' for the result till we can continue. This code is much
+more readable compared to the construct needed for `same_thread_complicated`. Using the suspended
+coroutines `gradle run --args='-a callable -t 20 -r suspended -d 500'` completes in about half a second.
 
-### <a id="unsafe_consumer">unsafe_consumer</a>
+### <a id="Unsafe Consumer">unsafe_consumer</a>
 
 TODO
 
-### <a id="safe_consumer">safe_consumer</a>
+### <a id="Safe Consumer">safe_consumer</a>
 
 TODO
 

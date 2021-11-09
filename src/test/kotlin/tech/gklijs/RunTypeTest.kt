@@ -23,6 +23,11 @@ class RunTypeTest {
     }
 
     @Test
+    fun sameThreadComplicatedTest() {
+        genericTest(RunType.SAME_THREAD_COMPLICATED)
+    }
+
+    @Test
     fun threadPoolTest() {
         genericTest(RunType.THREAD_POOL)
     }

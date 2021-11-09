@@ -7,7 +7,20 @@ import java.util.concurrent.Future
 enum class RunType(val description: String, val run: RunFunction) {
     SAME_THREAD("serially running all actions in same thread",
         { d, t, a ->
+            repeat(t) {
+                a.action.run(d)
+            }
+        }),
+
+    SAME_THREAD_COMPLICATED("serially running all actions in same thread, does complicated things to reduce time when possible",
+        { d, t, a ->
             when (val action = a.action) {
+                is GetSupplier -> {
+                    repeat(t) {
+                        //no way around the delays in this case
+                        action.value.invoke(d).log()
+                    }
+                }
                 is GetFuture -> {
                     val futures = buildList(t) {
                         repeat(t) {
@@ -24,8 +37,16 @@ enum class RunType(val description: String, val run: RunFunction) {
                     }
                     futures.forEach { x -> x.get() }
                 }
-                else -> repeat(t) {
-                    action.run(d)
+                is GetConsumer -> {
+                    val consumers = mutableListOf<RunningConsumer>()
+                    repeat(t) {
+                        val consumer = action.value.invoke(d)
+                        consumers.add(RunningConsumer(consumer, Constants.consumeAmount))
+                    }
+                    while (consumers.isNotEmpty()) {
+                        consumers.forEach { c -> c.next() }
+                        consumers.removeIf { c -> c.reachedGoal() }
+                    }
                 }
             }
         }),

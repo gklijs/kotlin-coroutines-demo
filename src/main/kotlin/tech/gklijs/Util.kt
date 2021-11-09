@@ -39,6 +39,23 @@ fun PollingConsumer<Int>.runTill(items: Int) {
     this.close()
 }
 
+data class RunningConsumer(val consumer: PollingConsumer<Int>, val goal: Int, var consumed: Int = 0)
+
+fun RunningConsumer.next() {
+    val intIterator = this.consumer.poll(Constants.consumeDelay).iterator()
+    while (intIterator.hasNext() && !this.reachedGoal()) {
+        this.consumed += 1
+        intIterator.next().log()
+    }
+    if (this.consumed == this.goal) {
+        consumer.close()
+    }
+}
+
+fun RunningConsumer.reachedGoal(): Boolean {
+    return this.consumed == this.goal
+}
+
 suspend fun IntAction.suspend(delay: Int) {
     when (this) {
         is GetSupplier -> this.value.viaHelper(delay)
