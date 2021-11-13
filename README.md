@@ -129,13 +129,28 @@ no longer need to check each time and delay, but we just 'wait' for the result t
 more readable compared to the construct needed for `same_thread_complicated`. Using the suspended
 coroutines `gradle run --args='-a callable -t 20 -r suspended -d 500'` completes in about half a second.
 
-### <a id="Unsafe Consumer">unsafe_consumer</a>
+### <a id="unsafe_consumer">Unsafe Consumer</a>
 
-TODO
+The consumer is a specific class, based on
+the [Kafka Consumer](https://github.com/a0x8o/kafka/blob/master/clients/src/main/java/org/apache/kafka/clients/consumer/Consumer.java)
+, but much more simplified to just care about thread safety and blocking or not when calling `poll` to get new items. It
+will create the amount of consumer noted by the `-t` option, and it will keep polling each consumer till it consumed the
+items noted by the `-ca` option. `gradle run --args='-a unsafe_consumer -t 5 -r same_thread -d 500 -ca 5'` will create 5
+consumers serially and each time wait till it consumed 5 items. For each consumer this will take about 2,5 seconds,
+since the delay is set to 500, meaning it will take hal a second till each next item is available. The time for it to
+run will thus take about 12,5 seconds. This is not very efficient, and by adding some complexity to the code we can
+reduce it to 2,5 seconds with the `same_thread_complicated`, by creating all the consumers first, and than keep polling
+each till it's done. When a poll is called from a different thread it was previously run, it will through an error. Thus
+running `gradle run --args='-a unsafe_consumer -t 5 -r suspended_default -d 500 -ca 5'`, will most likely end in an
+error
+like: `Encountered exception trying to run the tasks: tech.gklijs.consumer.ConcurrentException: called consumer from DefaultDispatcher-worker-2 but was called from DefaultDispatcher-worker-6 before`
 
-### <a id="Safe Consumer">safe_consumer</a>
+### <a id="safe_consumer">Safe Consumer</a>
 
-TODO
+This is more or less the same thing as the unsafe consumer, but this time the implementation is thread safe using a
+queue. The command `gradle run --args='-a safe_consumer -t 5 -r suspended_default -d 500 -ca 5'
+` will end successfully in about 2,5 seconds. To use the consumer on coroutines a combination of polling with `poll(0)`
+and using `delay` is used as to not block the coroutines.
 
 ## <a id="diagrams">Diagrams</a>
 
