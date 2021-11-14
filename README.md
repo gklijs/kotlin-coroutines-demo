@@ -16,6 +16,7 @@
   * [Use a separate context for delayed](#delayed-coroutine)
   * [Future from coroutine on the main thread](#future-coroutine)
   * [Using the consumer in parallel](#consumer-parallel)
+  * [Error with unsafe consumer with default context](#unsafe-consumer-error)
 
 ## <a id="intro">Introduction</a>
 
@@ -187,3 +188,13 @@ another thread we can cal poll to get those things. In thus case we will use the
 using the main thread, so it's fine to use the unsafe consumer. In this case `poll(0)` is used to poll, so we don't
 block. The picture below is an approximation of running `gradle run --args='-a unsafe_consumer -t 2 -r suspended -ca 2`.
 ![main thread created consumers, keeps polling and delaying till all consumers delivered 2 things](img/unsafe_consumer_suspended.png "Running consumer suspended")
+
+### <a id="unsafe-consumer-error">Error with unsafe consumer with default context</a>
+
+When we run something like `gradle run --args='-a unsafe_consumer -t 2 -r suspended_default -d 50 -ca 100 -cd 50'` soon
+enough an error will pop up because `poll` is called from multiple threads. This happens because each consumer is
+actually tracking from which thread it is called, but the actual implementation is also not thread safe, as almost
+simultaneous will cause it to return more items than it should. The default context has a minimum of 2 threads to work
+on, with the upper limit being the number of vCPU's available. The actual threads the execution lands on might differ.
+Once an error pops up, the program is exited.
+![main thread launches to default coroutine context, error will pop up](img/unsafe_consumer_suspended_default.png "Running consumer suspended")

@@ -1,0 +1,30 @@
+@startuml
+    skinparam {
+        shadowing false
+        defaultFontName Mark Pro
+        defaultFontColor #black
+        defaultFontSize 16
+        defaultFontStyle bold
+        ArrowColor #red
+        ArrowThickness 2
+        BorderColor #red
+        EntityBorderColor #red
+        ParticipantBorderColor #red
+    }
+    skinparam sequence {
+        LifeLineBorderThickness 2
+        LifeLineBorderColor #black
+    }
+
+    entity "main thread" as mt #green
+    entity "DefaultDispatcher-worker-1" as c1 #yellow
+    entity "DefaultDispatcher-worker-3" as c2 #yellow
+    participant "system out" as so #white
+
+    mt -> : dispatch to default context
+    c1 -> c1 : create consumer 1
+    c2 -> c2 : create consumer 2
+    c1 -> so : poll consumer 1, print the one integer, delay
+    c2 -> so : poll consumer 2, print the one integer, delay
+    c2 -> mt : poll consumer 1, exception thrown, close
+@enduml
