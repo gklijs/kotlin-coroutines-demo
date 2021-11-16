@@ -60,7 +60,7 @@ class ActionTypeTest {
         val action = ActionType.SAFE_CONSUMER.action
         assertTrue(action is GetConsumer)
         val consumer = action.value.invoke(delay)
-        //adding 10 ms is not nice, but takes care of the stuff needed to initiate this consumer
+        // adding 10 ms is not nice, but takes care of the stuff needed to initiate this consumer
         val pollResult = consumer.poll(delay + 10)
         assertTrue(pollResult.isNotEmpty())
         val end = Instant.now()

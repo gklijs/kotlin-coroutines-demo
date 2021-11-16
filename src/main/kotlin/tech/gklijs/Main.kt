@@ -17,19 +17,35 @@ fun main(args: Array<String>) {
         .default(ActionType.DELAYED)
     val runType by parser.option(ArgType.Choice<RunType>(), shortName = "r", description = "how to run the actions")
         .default(RunType.SAME_THREAD)
-    val consumeDelay by parser.option(ArgType.Int,
+    val consumeDelay by parser.option(
+        ArgType.Int,
         shortName = "cd",
-        description = "max delay between poll calls in milliseconds").default(Constants.consumeDelay)
-    val consumeAmount by parser.option(ArgType.Int,
+        description = "max delay between poll calls in milliseconds"
+    ).default(
+        Constants.consumeDelay
+    )
+    val consumeAmount by parser.option(
+        ArgType.Int,
         shortName = "ca",
-        description = "amount of items to consume before closing the consumer").default(Constants.consumeAmount)
-    val futureDelay by parser.option(ArgType.Int,
+        description = "amount of items to consume before closing the consumer"
+    ).default(
+        Constants.consumeAmount
+    )
+    val futureDelay by parser.option(
+        ArgType.Int,
         shortName = "fd",
-        description = "amount of time between checking if the future has resolved").default(Constants.futureDelay)
-    val helperThreads by parser.option(ArgType.Int,
+        description = "amount of time between checking if the future has resolved"
+    ).default(
+        Constants.futureDelay
+    )
+    val helperThreads by parser.option(
+        ArgType.Int,
         shortName = "ht",
-        description = "amount of threads the helper has, this will be used to suspend the delayed function in another context")
-        .default(Constants.helperThreads)
+        description = "amount of threads the helper has, this will be used to suspend the delayed function in another context"
+    )
+        .default(
+            Constants.helperThreads
+        )
 
     try {
         parser.parse(args)

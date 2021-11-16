@@ -11,8 +11,8 @@ class GetFutureWithCallBack<C>(val value: C) : Action<Nothing, Nothing, C, Nothi
 class GetConsumer<STC>(val value: STC) : Action<Nothing, Nothing, Nothing, STC>
 
 typealias IntAction = Action<
-            (Int) -> Int,
-            (Int) -> Future<Int>,
-            (Int, Consumer<Int>) -> Future<Int>,
-            (Int) -> PollingConsumer<Int>
-        >
+    (Int) -> Int,
+    (Int) -> Future<Int>,
+    (Int, Consumer<Int>) -> Future<Int>,
+    (Int) -> PollingConsumer<Int>
+    >

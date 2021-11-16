@@ -14,9 +14,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 fun Int.log() {
-    println("${Instant.now()} - received number: ${
+    println(
+        "${Instant.now()} - received number: ${
         this.toString().padStart(5, '0')
-    } - logged from ${Thread.currentThread().name}")
+        } - logged from ${Thread.currentThread().name}"
+    )
 }
 
 fun IntAction.run(delay: Int) {
