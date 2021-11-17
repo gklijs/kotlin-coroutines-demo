@@ -1,0 +1,26 @@
+@startuml
+    skinparam {
+        shadowing false
+        defaultFontName Mark Pro
+        defaultFontColor #black
+        defaultFontSize 16
+        defaultFontStyle bold
+        ArrowColor #red
+        ArrowThickness 2
+        BorderColor #red
+        EntityBorderColor #red
+        ParticipantBorderColor #red
+    }
+    skinparam sequence {
+        LifeLineBorderThickness 2
+        LifeLineBorderColor #black
+    }
+
+    entity "main thread" as mt #green
+    participant "system out" as so #white
+
+    mt -> mt : create consumer 1
+    mt -> so : keep polling until goal, close
+    mt -> mt : create consumer 2
+    mt -> so : keep polling until goal, close
+@enduml

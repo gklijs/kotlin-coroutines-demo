@@ -162,7 +162,7 @@ Here are some diagrams for some action type with run type combinations to make c
 This is one of the ways to run multiple things in parallel. A poll with multiple threads is created and functions can be
 executed on of the backing threads. The picture below is an approximation of
 running `gradle run --args='-a delayed -t 2 -r thread_pool'`.
-![main thread using two child threads to each do a delayed call](img/delayed.png "Delayed on thread pool")
+![main thread using two child threads to each do a delayed call](img/delayed_threadpool.png "Delayed on thread pool")
 
 ### <a id="delayed-coroutine">Use a separate context for delayed</a>
 

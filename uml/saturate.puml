@@ -1,0 +1,32 @@
+@startuml
+    skinparam {
+        shadowing false
+        defaultFontName Mark Pro
+        defaultFontColor #black
+        defaultFontSize 16
+        defaultFontStyle bold
+        ArrowColor #red
+        ArrowThickness 2
+        BorderColor #red
+        EntityBorderColor #red
+        ParticipantBorderColor #red
+    }
+    skinparam sequence {
+        LifeLineBorderThickness 2
+        LifeLineBorderColor #black
+    }
+
+    entity "main thread" as mt #green
+    entity "pool-1-thread-1" as c1 #yellow
+    entity "pool-1-thread-2" as c2 #yellow
+
+    mt -> c1 : initiate delay call
+    activate c1 #blue
+    mt -> c2 : initiate delay call
+    activate c2 #blue
+    mt --> c1 : can't start third
+    c1 -> mt : return
+    deactivate c1
+    c2 -> mt : return
+    deactivate c2
+@enduml

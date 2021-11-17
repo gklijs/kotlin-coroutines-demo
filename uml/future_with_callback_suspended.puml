@@ -1,0 +1,29 @@
+@startuml
+    skinparam {
+        shadowing false
+        defaultFontName Mark Pro
+        defaultFontColor #black
+        defaultFontSize 16
+        defaultFontStyle bold
+        ArrowColor #red
+        ArrowThickness 2
+        BorderColor #red
+        EntityBorderColor #red
+        ParticipantBorderColor #red
+    }
+    skinparam sequence {
+        LifeLineBorderThickness 2
+        LifeLineBorderColor #black
+    }
+
+    entity "main thread" as mt #green
+    entity "java thread" as jt #yellow
+    participant "system out" as so #white
+
+    mt -> jt : create suspended coroutine 1
+    mt -> jt : create suspended coroutine 2
+    jt -> jt : complete future 1
+    mt -> so : continuation 1 resumed and print msg
+    jt -> jt : complete future 2
+    mt -> so : continuation 2 resumed and print msg
+@enduml
