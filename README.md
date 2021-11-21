@@ -58,7 +58,7 @@ till all three of them are realized. Since this is done from a coroutine context
 realize before starting the next one, it will be done running them in only a little more than 500 milliseconds. With
 coroutines the actions will be run using launch, so it won't wait for a task to complete before starting the next task.
 
-Here is the output from `run --args='-h' to get a quick idea:
+Here is the output from `run --args='-h'` to get a quick idea:
 
 ```
 Usage: kotlin coroutines demo options_list

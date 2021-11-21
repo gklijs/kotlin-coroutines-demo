@@ -10,7 +10,7 @@ enum class ActionType(val description: String, val action: IntAction) {
         GetFuture { d -> tech.gklijs.supplier.DelayedInt.getFuture(d) }
     ),
     CALLABLE(
-        "creating a callable that will be called in the st time",
+        "creating a callable that will be called in the set time",
         GetFutureWithCallBack { d, c -> tech.gklijs.supplier.DelayedInt.getFuture(d, c) }
     ),
     UNSAFE_CONSUMER(
