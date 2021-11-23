@@ -58,9 +58,13 @@ fun RunningConsumer.reachedGoal(): Boolean {
     return this.consumed == this.goal
 }
 
-suspend fun IntAction.suspend(delay: Int) {
+suspend fun IntAction.suspend(delay: Int, withHelper: Boolean = true) {
     when (this) {
-        is GetSupplier -> this.value.viaHelper(delay)
+        is GetSupplier -> if (withHelper) {
+            this.value.viaHelper(delay)
+        } else {
+            this.value.invoke(delay).log()
+        }
         is GetFuture -> this.value.invoke(delay).eventuallyLog()
         is GetFutureWithCallBack -> this.value.dispatch(delay).log()
         is GetConsumer -> this.value.invoke(delay).suspendTill(Constants.consumeAmount)

@@ -1,6 +1,7 @@
 package tech.gklijs
 
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.util.concurrent.Future
 
@@ -109,11 +110,22 @@ enum class RunType(val description: String, val run: RunFunction) {
         }
     }),
 
-    @OptIn(ObsoleteCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    SUSPENDED_DEFAULT_LIMITED_PARALLELISM(
+        "run suspended in the default context with limited parallelism", { d, t, a ->
+            kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.Default.limitedParallelism(Constants.parallelism)) {
+                repeat(t) {
+                    launch { a.action.suspend(d, false) }
+                }
+            }
+        }
+    ),
+
+    @OptIn(DelicateCoroutinesApi::class)
     SUSPENDED_NEW("run suspended, each action in it's own single threaded context", { d, t, a ->
         kotlinx.coroutines.runBlocking() {
             repeat(t) {
-                launch(kotlinx.coroutines.newSingleThreadContext("new-coroutine-$it")) { a.action.suspend(d) }
+                launch(kotlinx.coroutines.newSingleThreadContext("new-coroutine-$it")) { a.action.suspend(d, false) }
             }
         }
     }),

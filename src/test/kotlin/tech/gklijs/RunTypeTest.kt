@@ -58,6 +58,11 @@ class RunTypeTest {
     }
 
     @Test
+    fun coroutineDefaultLimitedParallelism() {
+        genericTest(RunType.SUSPENDED_DEFAULT_LIMITED_PARALLELISM)
+    }
+
+    @Test
     fun suspendedNewTest() {
         genericTest(RunType.SUSPENDED_NEW)
     }

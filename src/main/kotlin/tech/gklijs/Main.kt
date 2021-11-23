@@ -42,10 +42,16 @@ fun main(args: Array<String>) {
         ArgType.Int,
         shortName = "ht",
         description = "amount of threads the helper has, this will be used to suspend the delayed function in another context"
+    ).default(
+        Constants.helperThreads
     )
-        .default(
-            Constants.helperThreads
-        )
+    val parallelism by parser.option(
+        ArgType.Int,
+        shortName = "p",
+        description = "limited parallelism used with SUSPENDED_DEFAULT_LIMITED_PARALLELISM"
+    ).default(
+        Constants.parallelism
+    )
 
     try {
         parser.parse(args)
@@ -53,6 +59,7 @@ fun main(args: Array<String>) {
         Constants.setAndPrintConsumeAmount(consumeAmount)
         Constants.setAndPrintFutureDelay(futureDelay)
         Constants.setAndPrintHelperThreads(helperThreads)
+        Constants.setAndPrintParallelism(parallelism)
         println("Will start ${actionType.description} with a delay of $delay milliseconds for a total of $times times, ${runType.description}.")
 
         val startTime = Instant.now()

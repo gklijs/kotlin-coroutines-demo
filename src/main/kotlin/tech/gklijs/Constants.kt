@@ -5,6 +5,7 @@ object Constants {
     var consumeAmount: Int = 10
     var futureDelay: Int = 10
     var helperThreads: Int = 2
+    var parallelism: Int = 2
 
     fun setAndPrintConsumeDelay(value: Int) {
         if (value != consumeDelay) {
@@ -31,6 +32,13 @@ object Constants {
         if (value != helperThreads) {
             helperThreads = value
             println("Set helper threads to $value.")
+        }
+    }
+
+    fun setAndPrintParallelism(value: Int) {
+        if (value != parallelism) {
+            parallelism = value
+            println("Set parallelism to $value.")
         }
     }
 }
